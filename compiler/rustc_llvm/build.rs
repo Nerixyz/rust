@@ -259,6 +259,7 @@ fn main() {
         println!("cargo:rustc-link-lib=z");
         println!("cargo:rustc-link-lib=execinfo");
     }
+    println!("cargo:rustc-link-lib=xxhash");
     cmd.args(&components);
 
     for lib in output(&mut cmd).split_whitespace() {
