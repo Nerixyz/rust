@@ -201,6 +201,8 @@ fn main() {
         cfg.define("NDEBUG", None);
     }
 
+    cfg.define("IRHASH_RUST_BUILD", None);
+
     rerun_if_changed_anything_in_dir(Path::new("llvm-wrapper"));
     cfg.file("llvm-wrapper/PassWrapper.cpp")
         .file("llvm-wrapper/RustWrapper.cpp")
@@ -208,6 +210,7 @@ fn main() {
         .file("llvm-wrapper/CoverageMappingWrapper.cpp")
         .file("llvm-wrapper/SymbolWrapper.cpp")
         .file("llvm-wrapper/Linker.cpp")
+        .file("/irhash/pass/irhashcore.cpp")
         .cpp(true)
         .cpp_link_stdlib(None) // we handle this below
         .compile("llvm-wrapper");

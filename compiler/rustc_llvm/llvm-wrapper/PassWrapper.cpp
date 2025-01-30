@@ -5,6 +5,12 @@
 #include <set>
 #include <vector>
 
+#ifdef IRHASH_RUST_BUILD
+#include "/irhash/pass/irhashcore.hpp"
+#else
+#include "/home/johannes/dev/irhash/pass/irhashcore.hpp"
+#endif
+
 #include "LLVMWrapper.h"
 
 #include "llvm/Analysis/AliasAnalysis.h"
@@ -725,6 +731,27 @@ extern "C" LLVMRustResult LLVMRustOptimize(
     const char *ExtraPasses, size_t ExtraPassesLen, const char *LLVMPlugins,
     size_t LLVMPluginsLen) {
   Module *TheModule = unwrap(ModuleRef);
+
+  irhash::IRHashCore hasher;
+  hasher.add((int)OptLevelRust);
+  hasher.add((int)OptStage);
+  hasher.add(IsLinkerPluginLTO);
+  hasher.add(NoPrepopulatePasses);
+  hasher.add(VerifyIR);
+  hasher.add(LintIR);
+  hasher.add(UseThinLTOBuffers);
+  hasher.add(MergeFunctions);
+  hasher.add(UnrollLoops);
+  hasher.add(SLPVectorize);
+  hasher.add(LoopVectorize);
+  hasher.add(DisableSimplifyLibCalls);
+  hasher.add(EmitLifetimeMarkers);
+  hasher.add(DebugInfoForProfiling);
+  hasher.finish(*TheModule);
+  if (hasher.tryLoad(*TheModule)) {
+    return LLVMRustResult::Success;
+  }
+
   TargetMachine *TM = unwrap(TMRef);
   OptimizationLevel OptLevel = fromRust(OptLevelRust);
 
@@ -1005,6 +1032,9 @@ extern "C" LLVMRustResult LLVMRustOptimize(
     UpgradeCallsToIntrinsic(&*I++); // must be post-increment, as we remove
 
   MPM.run(*TheModule, MAM);
+
+  hasher.save(*TheModule);
+
   return LLVMRustResult::Success;
 }
 

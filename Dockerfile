@@ -13,7 +13,7 @@ apt install -y --no-install-recommends \
     build-essential git cmake ninja-build \
     git cmake ninja-build ca-certificates \
     libssl-dev python3 curl pkg-config \
-    clang-18 llvm-18-dev libpolly-18-dev liblld-18-dev libzstd-dev zlib1g-dev libxml2-dev
+    clang-18 llvm-18-dev libpolly-18-dev liblld-18-dev libzstd-dev zlib1g-dev libxml2-dev libxxhash-dev
 apt clean
 rm -rf /tmp/* /var/tmp/*
 
@@ -26,9 +26,12 @@ EOF
 ENV CC clang-18
 ENV CXX clang++-18
 ENV DESTDIR /output
+ENV IRHASH_CACHE /tmp/irhash
+RUN mkdir -p ${IRHASH_CACHE}
 
 COPY . /build/source
 
 VOLUME /output
+VOLUME /irhash
 
 CMD /build/source/build-it.sh
