@@ -732,9 +732,10 @@ extern "C" LLVMRustResult LLVMRustOptimize(
     size_t LLVMPluginsLen) {
   Module *TheModule = unwrap(ModuleRef);
 
-  bool canIrhash = !UseThinLTOBuffers && !IsLinkerPluginLTO &&
-                   OptStage != LLVMRustOptStage::ThinLTO &&
-                   OptStage != LLVMRustOptStage::FatLTO;
+  // bool canIrhash = !UseThinLTOBuffers && !IsLinkerPluginLTO &&
+  //                  OptStage != LLVMRustOptStage::ThinLTO &&
+  //                  OptStage != LLVMRustOptStage::FatLTO;
+  bool canIrhash = true;
 
   irhash::IRHashCore hasher;
   if (canIrhash) {

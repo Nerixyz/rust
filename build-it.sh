@@ -4,13 +4,13 @@ set -ex
 
 cd "$(dirname "$0")"
 
+# --set rust.debug=true \
+# --set rust.debuginfo-level=2 \
 ./configure \
     --set llvm.plugins=true \
     --set llvm.link-shared=true \
     --set rust.lld=false \
     --set rust.use-lld=false \
-    --set rust.debug=true \
-    --set rust.debuginfo-level=2 \
     --set target.x86_64-unknown-linux-gnu.llvm-config=/usr/bin/llvm-config-18
 
 ./x.py build
