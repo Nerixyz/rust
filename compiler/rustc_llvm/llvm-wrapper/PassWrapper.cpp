@@ -732,24 +732,30 @@ extern "C" LLVMRustResult LLVMRustOptimize(
     size_t LLVMPluginsLen) {
   Module *TheModule = unwrap(ModuleRef);
 
+  bool canIrhash = !UseThinLTOBuffers && !IsLinkerPluginLTO &&
+                   OptStage != LLVMRustOptStage::ThinLTO &&
+                   OptStage != LLVMRustOptStage::FatLTO;
+
   irhash::IRHashCore hasher;
-  hasher.add((int)OptLevelRust);
-  hasher.add((int)OptStage);
-  hasher.add(IsLinkerPluginLTO);
-  hasher.add(NoPrepopulatePasses);
-  hasher.add(VerifyIR);
-  hasher.add(LintIR);
-  hasher.add(UseThinLTOBuffers);
-  hasher.add(MergeFunctions);
-  hasher.add(UnrollLoops);
-  hasher.add(SLPVectorize);
-  hasher.add(LoopVectorize);
-  hasher.add(DisableSimplifyLibCalls);
-  hasher.add(EmitLifetimeMarkers);
-  hasher.add(DebugInfoForProfiling);
-  hasher.finish(*TheModule);
-  if (hasher.tryLoad(*TheModule)) {
-    return LLVMRustResult::Success;
+  if (canIrhash) {
+    hasher.add((int)OptLevelRust);
+    hasher.add((int)OptStage);
+    hasher.add(IsLinkerPluginLTO);
+    hasher.add(NoPrepopulatePasses);
+    hasher.add(VerifyIR);
+    hasher.add(LintIR);
+    hasher.add(UseThinLTOBuffers);
+    hasher.add(MergeFunctions);
+    hasher.add(UnrollLoops);
+    hasher.add(SLPVectorize);
+    hasher.add(LoopVectorize);
+    hasher.add(DisableSimplifyLibCalls);
+    hasher.add(EmitLifetimeMarkers);
+    hasher.add(DebugInfoForProfiling);
+    hasher.finish(*TheModule);
+    if (hasher.tryLoad(*TheModule)) {
+      return LLVMRustResult::Success;
+    }
   }
 
   TargetMachine *TM = unwrap(TMRef);
@@ -1033,7 +1039,9 @@ extern "C" LLVMRustResult LLVMRustOptimize(
 
   MPM.run(*TheModule, MAM);
 
-  hasher.save(*TheModule);
+  if (canIrhash) {
+    hasher.save(*TheModule);
+  }
 
   return LLVMRustResult::Success;
 }
